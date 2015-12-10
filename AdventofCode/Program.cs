@@ -31,7 +31,7 @@ namespace AdventofCode
                 stopwatch.Start();
                 string log = "Trying " + secret;
 
-                /* The Sequential version
+                //* The Sequential version
                 Console.Write(log);
 
                 //609043

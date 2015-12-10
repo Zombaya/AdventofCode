@@ -10,26 +10,49 @@ namespace AdventofCode
     {
         static void Main(string[] args)
         {
+            int total = 0;
+            string line;
+            Console.WriteLine("Enter one package (press CTRL+Z to exit):");
+            Console.WriteLine();
             do
             {
-                int level = 0;
-                int step = 1;
-                char c = ' ';
-                for(;  ((c = Console.ReadKey().KeyChar) != ' ') && (level != -1);step++)
-                {
-                    if (c == ')')
-                        level--;
-                    else if (c == '(')
-                        level++;
-                    else
-                        step--;
+                int w, l, h;
+                string[] numbers;
+                int thispackage = 0;
+                var t = new Tuple<int, int>(1, 2);
 
-                    if (level == -1)
-                        break;
-                }
-                Console.WriteLine("\n\nLevel " + level + " reached in " + step + " steps\n\n");
-            }
-            while (Console.ReadKey().Key != ConsoleKey.S);
+                line = Console.ReadLine();
+
+                string[] stringSeparators = new string[] { "x" };
+                numbers = line.Split(stringSeparators, StringSplitOptions.None);
+
+                w = Int32.Parse(numbers[0]);
+                l = Int32.Parse(numbers[1]);
+                h = Int32.Parse(numbers[2]);
+
+                t = addSides(w, h, 0);
+                thispackage += t.Item1;
+                t = addSides(l, h, t.Item2);
+                thispackage += t.Item1;
+                t = addSides(w, l, t.Item2);
+                thispackage += t.Item1;
+                thispackage += t.Item2;
+
+                total += thispackage;
+
+                if (line != null)
+                    Console.WriteLine("= " + thispackage + " - " + total);
+            } while (line != null);
+
+        }
+        static public Tuple<int, int> addSides(int side1, int side2, int smallestSide)
+        {
+            int opp = side1 * side2;
+            if (opp < smallestSide || smallestSide == 0)
+                smallestSide = opp;
+
+            return Tuple.Create(2 * opp, smallestSide);
         }
     }
+
 }

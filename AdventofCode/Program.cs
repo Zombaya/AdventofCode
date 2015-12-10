@@ -12,16 +12,22 @@ namespace AdventofCode
         {
             do
             {
-                int i = 0;
+                int level = 0;
+                int step = 1;
                 char c = ' ';
-                while ((c = Console.ReadKey().KeyChar) != ' ')
+                for(;  ((c = Console.ReadKey().KeyChar) != ' ') && (level != -1);step++)
                 {
                     if (c == ')')
-                        i--;
-                    if (c == '(')
-                        i++;
+                        level--;
+                    else if (c == '(')
+                        level++;
+                    else
+                        step--;
+
+                    if (level == -1)
+                        break;
                 }
-                Console.WriteLine("\n\nResult is: " + i + "\n\n");
+                Console.WriteLine("\n\nLevel " + level + " reached in " + step + " steps\n\n");
             }
             while (Console.ReadKey().Key != ConsoleKey.S);
         }

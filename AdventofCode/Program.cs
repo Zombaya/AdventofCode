@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
+using System.Security.Cryptography;
+using System.Diagnostics;
 
 namespace AdventofCode
 {
@@ -12,81 +15,129 @@ namespace AdventofCode
         static void Main(string[] args)
         {
             int total = 0;
-            string line;
-            Console.WriteLine("Enter one package (press CTRL+Z to exit):");
-            Console.WriteLine();
+            string secret;
             do
             {
-                int w1=0, h1=0, w2=0,h2=0;
-                int maxw=0, maxh=0, minw=0, minh=0;
-                int houses = 0;
+                Console.WriteLine("Enter one secret (press CTRL+Z to exit):");
+                Console.WriteLine();
+                secret = Console.ReadLine();
 
-                line = File.ReadAllText("../../Day3.txt");
+                bool found = false;
+                int i = 0;
+                int stepsize = 10000;
 
-                for(int i=0; i< line.Length; i+=2)
+
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+                string log = "Trying " + secret;
+
+                /* The Sequential version
+                Console.Write(log);
+
+                //609043
+                for (i = 0; i < 10000000 && !found; i++)
                 {
-                    switch (line[i])
-                    {
-                        case '<': w1--; break;
-                        case '>': w1++; break;
-                        case '^': h1++; break;
-                        case 'v': h1--; break;
-                    }
-                    switch (line[i+1])
-                    {
-                        case '<': w2--; break;
-                        case '>': w2++; break;
-                        case '^': h2++; break;
-                        case 'v': h2--; break;
-                    }
-                    minw = new int[] { minw, w1, w2 }.Min();
-                    minh = new int[] { minh, h1, h2 }.Min();
-                    maxw = new int[] { maxw, w1, w2 }.Max();
-                    maxh = new int[] { maxh, h1, h2 }.Max();
+                    Console.SetCursorPosition(log.Length, Console.CursorTop);
+                    Console.Write(i * stepsize);
+                    found = linearCalc(secret, "000000", stepsize, stepsize * i);
                 }
+                Console.WriteLine();
 
-                int totalw = maxw - minw + 1;
-                int totalh = maxh - minh + 1;
-
-                int[] start = new int[2] { -minw, -minh};
-                int[,] presents = new int[totalw,totalh];
-
-                // 1 present for the starter
-                presents[-minw, -minh] = 1;
-                houses += 1;
-
-                for (int i1 = -minw,i2 = -minw, j1 = -minh, j2 = -minh, c=0; c < line.Length; c+=2)
-                {
-                    switch (line[c])
-                    {
-                        case '<': i1--; break;
-                        case '>': i1++; break;
-                        case '^': j1++; break;
-                        case 'v': j1--; break;
-                        default: continue;
-                    }
-                    switch (line[c+1])
-                    {
-                        case '<': i2--; break;
-                        case '>': i2++; break;
-                        case '^': j2++; break;
-                        case 'v': j2--; break;
-                        default: continue;
-                    }
-                    if (presents[i1, j1] == 0)
-                        houses += 1;
-                    if (presents[i2, j2] == 0)
-                        houses += 1;
-                    presents[i1, j1] += 1;
-                    presents[i2, j2] += 1;
-                }
                 
-                if (line != null)
-                    Console.WriteLine("= " + houses + " huisjes - " );
-                Console.ReadLine();
-            } while (false);
+                if (!found)
+                    Console.WriteLine("Did not find correct hash in {0} steps", i);
+
+                Console.WriteLine("Sequential loop time in milliseconds: {0}",
+                                stopwatch.ElapsedMilliseconds);
+                //*/// End of the sequential version
+
+                stopwatch.Restart();
+                Console.Write(log);
+                found = false;
+
+                //609043
+                for (i = 0; i < 10000000 && !found; i++)
+                {
+                    Console.SetCursorPosition(log.Length, Console.CursorTop);
+                    Console.Write(i * stepsize);
+                    found = parallelCalc(secret, "000000", stepsize, stepsize * i);
+                }
+                Console.WriteLine();
+
+
+                if (!found)
+                    Console.WriteLine("Did not find correct hash in {0} steps", i);
+
+                Console.WriteLine("Parallel loop time in milliseconds: {0}",
+                                stopwatch.ElapsedMilliseconds);
+
+
+                Console.WriteLine("\n\n");
+            } while (secret != null);
 
         }
+        static string GetMd5Hash(MD5 md5Hash, string input)
+        {
+
+            // Convert the input string to a byte array and compute the hash.
+            byte[] data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(input));
+
+            // Create a new Stringbuilder to collect the bytes
+            // and create a string.
+            StringBuilder sBuilder = new StringBuilder();
+
+            // Loop through each byte of the hashed data 
+            // and format each one as a hexadecimal string.
+            for (int i = 0; i < data.Length; i++)
+            {
+                sBuilder.Append(data[i].ToString("x2"));
+            }
+
+            // Return the hexadecimal string.
+            return sBuilder.ToString();
+        }
+
+        public static bool linearCalc(string secret, string match, int iterations, int start = 0)
+        {
+            bool found = false;
+            int size = match.Length;
+            for (int i = start; i < start + iterations && !found; i++)
+            {
+                using (MD5 md5Hash = MD5.Create())
+                {
+                    string hash = GetMd5Hash(md5Hash, string.Concat(secret, i));
+                    if (hash.Substring(0,size).Equals(match))
+                    {
+                        Console.WriteLine("\n\nThe MD5 hash of {0} is {1}.  Calculated in {2} steps", secret, hash, i);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+        public static bool parallelCalc(string secret, string match, int iterations, int start = 0)
+        {
+            bool found = false;
+            int size = match.Length;
+            Parallel.For(start, start+iterations, i =>
+            {
+                using (MD5 md5Hash = MD5.Create())
+                {
+                    string hash = GetMd5Hash(md5Hash, string.Concat(secret, i));
+                    if (hash.Substring(0, size).Equals(match))
+                    {
+                        Console.WriteLine("\n\nThe MD5 hash of {0} is {1}.  Calculated in {2} steps", secret, hash, i);
+                        found = true;
+                    }
+                    if (start + iterations == 609043)
+                        Console.WriteLine("Should find now!");
+                }
+            });
+
+            return found;
+        }
     }
+
    
 }

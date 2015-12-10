@@ -15,65 +15,33 @@ namespace AdventofCode
         static void Main(string[] args)
         {
             int total = 0;
-            string secret;
-            do
-            {
-                Console.WriteLine("Enter one secret (press CTRL+Z to exit):");
-                Console.WriteLine();
-                secret = Console.ReadLine();
+            int nice = 0;
+            int naughty = 0;
+            string word;
+            Console.WriteLine("Enter one word (press CTRL+Z to exit):");
+            Console.WriteLine();
+            word = Console.ReadLine();
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            while (word != null)
+            {      
+                if (IsNice2(word))
+                    nice++;
+                else
+                    naughty++;
 
-                bool found = false;
-                int i = 0;
-                int stepsize = 10000;
+                Console.WriteLine("{0} is {1}", word, (IsNice2(word) ? "nice" : "naughty"));
 
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-                string log = "Trying " + secret;
-
-                /* The Sequential version
-                Console.Write(log);
-
-                //609043
-                for (i = 0; i < 10000000 && !found; i++)
-                {
-                    Console.SetCursorPosition(log.Length, Console.CursorTop);
-                    Console.Write(i * stepsize);
-                    found = linearCalc(secret, "000000", stepsize, stepsize * i);
-                }
-                Console.WriteLine();
-
-                
-                if (!found)
-                    Console.WriteLine("Did not find correct hash in {0} steps", i);
-
-                Console.WriteLine("Sequential loop time in milliseconds: {0}",
-                                stopwatch.ElapsedMilliseconds);
-                //*/// End of the sequential version
-
-                stopwatch.Restart();
-                Console.Write(log);
-                found = false;
-
-                //609043
-                for (i = 0; i < 10000000 && !found; i++)
-                {
-                    Console.SetCursorPosition(log.Length, Console.CursorTop);
-                    Console.Write(i * stepsize);
-                    found = parallelCalc(secret, "000000", stepsize, stepsize * i);
-                }
-                Console.WriteLine();
-
-
-                if (!found)
-                    Console.WriteLine("Did not find correct hash in {0} steps", i);
-
-                Console.WriteLine("Parallel loop time in milliseconds: {0}",
+                word = Console.ReadLine();
+            }
+            Console.WriteLine("Nice: {0}\nNaughty: {1}",nice,naughty);
+            Console.WriteLine("loop time in milliseconds: {0}",
                                 stopwatch.ElapsedMilliseconds);
 
 
-                Console.WriteLine("\n\n");
-            } while (secret != null);
+
+            Console.WriteLine("\n\nPress Any Key To Exit...");
+            Console.ReadLine();
 
         }
         static string GetMd5Hash(MD5 md5Hash, string input)
@@ -97,46 +65,68 @@ namespace AdventofCode
             return sBuilder.ToString();
         }
 
-        public static bool linearCalc(string secret, string match, int iterations, int start = 0)
+        public static bool IsNice1(string s)
         {
-            bool found = false;
-            int size = match.Length;
-            for (int i = start; i < start + iterations && !found; i++)
-            {
-                using (MD5 md5Hash = MD5.Create())
+            bool isnice = false;
+            for(int i=0; i< (s.Length - 1); i++)
+            { 
+                string sub = s.Substring(i, 2);
+                if (sub.Equals("ab") || sub.Equals("cd") || sub.Equals("pq") || sub.Equals("xy"))
                 {
-                    string hash = GetMd5Hash(md5Hash, string.Concat(secret, i));
-                    if (hash.Substring(0,size).Equals(match))
-                    {
-                        Console.WriteLine("\n\nThe MD5 hash of {0} is {1}.  Calculated in {2} steps", secret, hash, i);
-                        return true;
+                    return false;
+                }
+            }
+
+            for (int i = 0; i < (s.Length - 1); i++)
+            {
+                string sub = s.Substring(i, 2);
+                if (sub[0] == sub[1])
+                    isnice=true;
+            }
+            if (!isnice)
+                return false;
+
+            int vowels = 0;
+            for (int i = 0; i < s.Length; i++)
+            {
+                switch (s[i])
+                {
+                    case 'a': case 'e': case 'i': case 'o': case 'u': vowels++; break;
+                    default: break;   
+                }
+            }
+            if (vowels >= 3) return true;
+
+
+            return false;
+        }
+
+        public static bool IsNice2(string s)
+        {
+            bool isniceTo1 = false;
+            for (int i = 0; i < (s.Length - 1); i++)
+            {
+                string sub = s.Substring(i, 2);
+                for (int j = i + 2; j < (s.Length - 1) ; j++)
+                {
+                    if (sub.Equals(s.Substring(j, 2))){
+                        isniceTo1 = true;
+                        break;
                     }
                 }
+            }
+            if (!isniceTo1)
+                return false;
+
+            for(int i=0; i< (s.Length - 2); i++)
+            {
+                if (s[i] == s[i + 2])
+                    return true;
             }
 
             return false;
         }
-        public static bool parallelCalc(string secret, string match, int iterations, int start = 0)
-        {
-            bool found = false;
-            int size = match.Length;
-            Parallel.For(start, start+iterations, i =>
-            {
-                using (MD5 md5Hash = MD5.Create())
-                {
-                    string hash = GetMd5Hash(md5Hash, string.Concat(secret, i));
-                    if (hash.Substring(0, size).Equals(match))
-                    {
-                        Console.WriteLine("\n\nThe MD5 hash of {0} is {1}.  Calculated in {2} steps", secret, hash, i);
-                        found = true;
-                    }
-                    if (start + iterations == 609043)
-                        Console.WriteLine("Should find now!");
-                }
-            });
 
-            return found;
-        }
     }
 
    

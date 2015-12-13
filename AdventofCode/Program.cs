@@ -17,24 +17,72 @@ namespace AdventofCode
             int total = 0;
             int nice = 0;
             int naughty = 0;
-            string word;
+            bool[,] lichtjes = new bool[1000, 1000];
+            int xmin, xmax, ymin, ymax;
+            string[] nummers;
+
+            string line;
             Console.WriteLine("Enter one word (press CTRL+Z to exit):");
             Console.WriteLine();
-            word = Console.ReadLine();
+            line = Console.ReadLine();
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            while (word != null)
-            {      
-                if (IsNice2(word))
-                    nice++;
+            while (line != null)
+            {
+                string[] values = line.Split(' ');
+                if (values[0].Equals("turn"))
+                {
+                    nummers = values[2].Split(',');
+                    xmin = Int32.Parse(nummers[0]);
+                    ymin = Int32.Parse(nummers[1]);
+                    nummers = values[4].Split(',');
+                    xmax = Int32.Parse(nummers[0]);
+                    ymax = Int32.Parse(nummers[1]);
+
+                    if (values[1].Equals("on"))
+                    {
+                        for (int i = xmin; i <= xmax; i++)
+                        {
+                            for (int j = ymin; j <= ymax; j++)
+                            {
+                                lichtjes[i, j] = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int i = xmin; i <= xmax; i++)
+                        {
+                            for (int j = ymin; j <= ymax; j++)
+                            {
+                                lichtjes[i, j] = false;
+                            }
+                        }
+                    }
+                }
+                else if (values[0].Equals("toggle"))
+                {
+                    nummers = values[1].Split(',');
+                    xmin = Int32.Parse(nummers[0]);
+                    ymin = Int32.Parse(nummers[1]);
+                    nummers = values[3].Split(',');
+                    xmax = Int32.Parse(nummers[0]);
+                    ymax = Int32.Parse(nummers[1]);
+                    for (int i = xmin; i <= xmax; i++)
+                    {
+                        for (int j = ymin; j <= ymax; j++)
+                        {
+                            lichtjes[i, j] = !lichtjes[i, j];
+                        }
+                    }
+                }
                 else
-                    naughty++;
+                    break;
 
-                Console.WriteLine("{0} is {1}", word, (IsNice2(word) ? "nice" : "naughty"));
-
-                word = Console.ReadLine();
+                Console.WriteLine("\tTotaal lichtjes: "+ getTotal(lichtjes));
+                line = Console.ReadLine();
             }
-            Console.WriteLine("Nice: {0}\nNaughty: {1}",nice,naughty);
+            Console.WriteLine("Totaal lichtjes: "+getTotal(lichtjes));
             Console.WriteLine("loop time in milliseconds: {0}",
                                 stopwatch.ElapsedMilliseconds);
 
@@ -44,6 +92,20 @@ namespace AdventofCode
             Console.ReadLine();
 
         }
+        static string getTotal(bool[,] lichtjes)
+        {
+            int total = 0;
+            for (int i = 0; i < 1000; i++)
+            {
+                for (int j = 0; j < 1000; j++)
+                {
+                    if (lichtjes[i, j])
+                        total++;
+                }
+            }
+            return total.ToString() ;
+        }
+
         static string GetMd5Hash(MD5 md5Hash, string input)
         {
 

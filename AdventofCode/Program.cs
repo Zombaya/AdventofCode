@@ -17,7 +17,7 @@ namespace AdventofCode
             int total = 0;
             int nice = 0;
             int naughty = 0;
-            bool[,] lichtjes = new bool[1000, 1000];
+            int[,] lichtjes = new int[1000, 1000];
             int xmin, xmax, ymin, ymax;
             string[] nummers;
 
@@ -45,7 +45,7 @@ namespace AdventofCode
                         {
                             for (int j = ymin; j <= ymax; j++)
                             {
-                                lichtjes[i, j] = true;
+                                lichtjes[i, j] += 1;
                             }
                         }
                     }
@@ -55,7 +55,8 @@ namespace AdventofCode
                         {
                             for (int j = ymin; j <= ymax; j++)
                             {
-                                lichtjes[i, j] = false;
+                                if(lichtjes[i, j] != 0)
+                                    lichtjes[i, j] -= 1;
                             }
                         }
                     }
@@ -72,7 +73,7 @@ namespace AdventofCode
                     {
                         for (int j = ymin; j <= ymax; j++)
                         {
-                            lichtjes[i, j] = !lichtjes[i, j];
+                            lichtjes[i, j] += 2;
                         }
                     }
                 }
@@ -92,15 +93,14 @@ namespace AdventofCode
             Console.ReadLine();
 
         }
-        static string getTotal(bool[,] lichtjes)
+        static string getTotal(int[,] lichtjes)
         {
             int total = 0;
             for (int i = 0; i < 1000; i++)
             {
                 for (int j = 0; j < 1000; j++)
                 {
-                    if (lichtjes[i, j])
-                        total++;
+                    total += lichtjes[i, j] ;
                 }
             }
             return total.ToString() ;

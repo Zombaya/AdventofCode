@@ -15,21 +15,26 @@ namespace AdventofCode
         static void Main(string[] args)
         {
             string word;
+            int total = 0;
 
             string line;
             Console.WriteLine("Enter one word (press CTRL+Z to exit):");
             Console.WriteLine();
-            line = Console.ReadLine();
+            line = File.ReadAllText("../../Day12.txt"); ;
             word = line;
             Console.WriteLine();
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            for(int i = 0; i<50; i++) 
+            while (line != null && line != "")
             {
-                word = doStep(word);
+                int sum = addLine(line);
+                total += sum;
+                Console.WriteLine("\t{0}", sum);
+
+                line = Console.ReadLine();
             }
-            Console.WriteLine("After 50 steps: " + word.Length);
+            Console.WriteLine("Total: {0}",total);
             Console.WriteLine("loop time in milliseconds: {0}",
                                 stopwatch.ElapsedMilliseconds);
 
@@ -41,32 +46,34 @@ namespace AdventofCode
         }
         
 
-        static string doStep(string input)
+        static int addLine(string input)
         {
-            StringBuilder result = new StringBuilder(1000000);
-            char previous;
-            int count = 1;
-
-            if (input.Length == 0)
-                return "";
-            else
-                previous = input[0];
+            int result=0;
+            int current = 0;
+            bool negative = false;
+            
             for(int i = 1; i < input.Length; i++)
             {
-                if(input[i] == previous)
+                if(input[i] >= '0' && input[i] <= '9')
                 {
-                    count += 1;
+                    current = current * 10 + input[i] - '0';
+                }
+                else if(input[i] == '-')
+                {
+                    negative = true;
                 }
                 else
                 {
-                    result.Append(count).Append(previous);
-                    previous = input[i];
-                    count = 1;
+                    if (negative)
+                        result -= current;
+                    else
+                        result += current;
+                    current = 0;
+                    negative = false;
                 }
             }
-            result.Append(count).Append(previous);
 
-            return result.ToString();
+            return result;
         }
     }
 }

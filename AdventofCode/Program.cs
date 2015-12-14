@@ -14,27 +14,22 @@ namespace AdventofCode
     {
         static void Main(string[] args)
         {
-            int totaloriginal = 0;
-            int totalencoded = 0;
+            string word;
 
             string line;
             Console.WriteLine("Enter one word (press CTRL+Z to exit):");
             Console.WriteLine();
             line = Console.ReadLine();
+            word = line;
+            Console.WriteLine();
+
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            while (line != null && !line.Equals(""))
+            for(int i = 0; i<50; i++) 
             {
-                string encoded = encode(line);
-
-                totaloriginal += line.Length;
-                totalencoded += encoded.Length;
-
-                Console.WriteLine("\t Totaal encoded: {0}\toriginal: {1}", line.Length, encoded.Length);
-
-                line = Console.ReadLine();
+                word = doStep(word);
             }
-            Console.WriteLine("Totaal encoded: {0} - original: {1} = {2}", totaloriginal, totalencoded, totaloriginal - totalencoded);
+            Console.WriteLine("After 50 steps: " + word.Length);
             Console.WriteLine("loop time in milliseconds: {0}",
                                 stopwatch.ElapsedMilliseconds);
 
@@ -44,20 +39,34 @@ namespace AdventofCode
             Console.ReadLine();
 
         }
+        
 
-        static string encode(string s)
+        static string doStep(string input)
         {
-            string result = "";
-            for(int i = 0; i < s.Length; i++)
+            StringBuilder result = new StringBuilder(1000000);
+            char previous;
+            int count = 1;
+
+            if (input.Length == 0)
+                return "";
+            else
+                previous = input[0];
+            for(int i = 1; i < input.Length; i++)
             {
-                switch (s[i])
+                if(input[i] == previous)
                 {
-                    case '"': result += "\\\""; break;
-                    case '\\': result += "\\\\"; break;
-                    default: result += s[i]; break;
+                    count += 1;
+                }
+                else
+                {
+                    result.Append(count).Append(previous);
+                    previous = input[i];
+                    count = 1;
                 }
             }
-            return '"' + result + '"';
+            result.Append(count).Append(previous);
+
+            return result.ToString();
         }
     }
 }

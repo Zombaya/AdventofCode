@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
@@ -14,26 +15,34 @@ namespace AdventofCode
     {
         static void Main(string[] args)
         {
-            string word;
+            Day14 d = new Day14();
+            
             int total = 0;
 
             string line;
-            Console.WriteLine("Enter one word (press CTRL+Z to exit):");
+            Console.WriteLine("Enter one sentence (press CTRL+Z to exit):");
             Console.WriteLine();
-            line = File.ReadAllText("../../Day12.txt"); ;
-            word = line;
-            Console.WriteLine();
+
+            line = Console.ReadLine();
+
+            while (line != null && line != "")
+            {
+                var regex = new Regex(@"(?<name>\w+) can fly (?<speed>\d+) km/s for (?<timeFlying>\d+) seconds, but then must rest for (?<timeResting>\d+) seconds.");
+                var match = regex.Match(line);
+                if (match.Success)
+                {
+                    d.addDeer(
+                        match.Groups["name"].Value,
+                        Int32.Parse(match.Groups["speed"].Value),
+                        Int32.Parse(match.Groups["timeFlying"].Value),
+                        Int32.Parse(match.Groups["timeResting"].Value));
+                }
+                line = Console.ReadLine();
+            }
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            while (line != null && line != "")
-            {
-                int sum = addLine(line);
-                total += sum;
-                Console.WriteLine("\t{0}", sum);
-
-                line = Console.ReadLine();
-            }
+            Console.WriteLine("Record: " + d.getMaxDistance(2503));
             Console.WriteLine("Total: {0}",total);
             Console.WriteLine("loop time in milliseconds: {0}",
                                 stopwatch.ElapsedMilliseconds);

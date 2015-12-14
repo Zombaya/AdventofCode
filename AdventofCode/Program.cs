@@ -43,7 +43,8 @@ namespace AdventofCode
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             Console.WriteLine("Record: " + d.getMaxDistance(2503));
-            Console.WriteLine("Total: {0}",total);
+            Reindeer bestdeer = d.getHighScore(2503);
+            Console.WriteLine("Highest score was {0} by {1}", bestdeer.getName(),bestdeer.getScore());
             Console.WriteLine("loop time in milliseconds: {0}",
                                 stopwatch.ElapsedMilliseconds);
 

@@ -15,10 +15,9 @@ namespace AdventofCode
         static void Main(string[] args)
         {
             Day15 d = new Day15();
-            
-            int total = 0;
-
             string line;
+            
+
             Console.WriteLine("Enter one sentence (press CTRL+Z to exit):");
             Console.WriteLine();
 

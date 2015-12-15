@@ -9,7 +9,7 @@ namespace AdventofCode
 {
     class Day15
     {
-        public List<ingredient> ingredients = new List<ingredient>(4);
+        public List<ingredient> ingredients = new List<ingredient>(10);
 
         public bool addIngredientLine(string line)
         {
@@ -36,39 +36,51 @@ namespace AdventofCode
 
         public void addIngredient(string name, int cap, int dur, int fla, int tex, int cal)
         {
-            ingredients.Add(new ingredient(name, cap, dur, fla, tex, cal));
-            //
-            int i = 0;
+            this.ingredients.Add(new ingredient(name, cap, dur, fla, tex, cal));
+        }
+
+        public void testCombinations(int c,int t)
+        {
+            List<List<int>> combo = this.getPossibleCombinations(c, t);
+            foreach(List<int> lijst in combo)
+            {
+                foreach(int i in lijst)
+                {
+                    Console.Write("{0} ", i);
+                }
+                Console.WriteLine();
+            }
         }
 
         public void printBestCombination(int teaspoons)
         {
             int max = 0;
-            int[] best = new int[4];
+            List<int> best = new List<int>(this.ingredients.Count());
+            List<List<int>> combolijst = this.getPossibleCombinations(this.ingredients.Count(), teaspoons);
 
-            for (int i = 0 ; i < teaspoons ; i++)
+            foreach(List<int> combo in combolijst)
             {
-                for(int j = 0 ; j<teaspoons - i ; j++)
+                int mult = 1;
+                for (int x = 0; x < 4; x++)
                 {
-                    for(int k = 0; k < teaspoons - i - j ; k++)
+                    int sum = 0;
+                    int i = 0;
+                    foreach (int aantal in combo)
                     {
-                        int l = teaspoons - i - j - k;
-                        int sum = 1;
-                        for (int x = 0; x < 4; x++)
-                        {
-                            sum *= Math.Max((i * ingredients[0].val[x] + j * ingredients[1].val[x] + k * ingredients[2].val[x] + l * ingredients[3].val[x]), 0);
-                        }
-                        if (sum > max)
-                        {
-                            max = sum;
-                            best = new int[4] { i, j, k, l };
-                        }
+                        sum += aantal * this.ingredients[i].val[x];
+                        i++;
                     }
+                    mult *= Math.Max(sum, 0);
                 }
-                
+                if (mult > max)
+                {
+                    max = mult;
+                    best = combo;
+                }
             }
+
             Console.WriteLine("Topscore: {0}", max);
-            for(int i = 0; i < 4; i++)
+            for(int i = 0; i < best.Count(); i++)
             {
                 Console.WriteLine("{0} teaspoons of {1}", best[i], ingredients[i].name);
             }
@@ -77,37 +89,65 @@ namespace AdventofCode
         public void printBestCombination(int teaspoons, int maxCal)
         {
             int max = 0;
-            int[] best = new int[4];
+            List<int> best = new List<int>(this.ingredients.Count());
+            List<List<int>> combolijst = this.getPossibleCombinations(this.ingredients.Count(), teaspoons);
 
-            for (int i = 0; i < teaspoons; i++)
+            foreach (List<int> combo in combolijst)
             {
-                for (int j = 0; j < teaspoons - i; j++)
+                int mult = 1;
+                int i = 0;
+                for (int x = 0; x < 4; x++)
                 {
-                    for (int k = 0; k < teaspoons - i - j; k++)
+                    int sum = 0;
+                    i = 0;
+                    foreach (int aantal in combo)
                     {
-                        int l = teaspoons - i - j - k;
-                        int sum = 1;
-                        for (int x = 0; x < 4; x++)
-                        {
-                            sum *= Math.Max((i * ingredients[0].val[x] + j * ingredients[1].val[x] + k * ingredients[2].val[x] + l * ingredients[3].val[x]), 0);
-                        }
-                        int cal = i * ingredients[0].val[4] + j * ingredients[1].val[4] + k * ingredients[2].val[4] + l * ingredients[3].val[4];
-                        if (sum > max && cal == maxCal)
-                        {
-                            max = sum;
-                            best = new int[4] { i, j, k, l };
-                        }
+                        sum += aantal * this.ingredients[i].val[x];
+                        i++;
                     }
+                    mult *= Math.Max(sum, 0);
                 }
-
+                int cal = 0;
+                i = 0;
+                foreach(int aantal in combo)
+                {
+                    cal += aantal * this.ingredients[i++].val[4];
+                }
+                if (mult > max && cal == maxCal)
+                {
+                    max = mult;
+                    best = combo;
+                }
             }
-            Console.WriteLine("Topscore with {1} calories: {0}", max,maxCal);
-            for (int i = 0; i < 4; i++)
+
+            Console.WriteLine("Topscore with {1} calories: {0}", max, maxCal);
+            for (int i = 0; i < best.Count(); i++)
             {
                 Console.WriteLine("{0} teaspoons of {1}", best[i], ingredients[i].name);
             }
         }
 
+        private List<List<int>> getPossibleCombinations(int variables, int total)
+        {
+            List<List<int>> result = new List<List<int>>();
+            if(variables == 1)
+            {
+                List<int> t = new List<int>();
+                t.Add(total);
+                result.Add(t);
+                return result;
+            }
+            for(int i = 0; i < total; i++)
+            {
+                List<List<int>> interresult = getPossibleCombinations(variables - 1, total - i) ;
+                foreach(List<int> o in interresult)
+                {
+                    o.Add(i);
+                    result.Add(o);
+                }
+            }
+            return result;
+        }
     }
 
     class ingredient

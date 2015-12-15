@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
@@ -15,7 +14,7 @@ namespace AdventofCode
     {
         static void Main(string[] args)
         {
-            Day14 d = new Day14();
+            Day15 d = new Day15();
             
             int total = 0;
 
@@ -27,24 +26,16 @@ namespace AdventofCode
 
             while (line != null && line != "")
             {
-                var regex = new Regex(@"(?<name>\w+) can fly (?<speed>\d+) km/s for (?<timeFlying>\d+) seconds, but then must rest for (?<timeResting>\d+) seconds.");
-                var match = regex.Match(line);
-                if (match.Success)
-                {
-                    d.addDeer(
-                        match.Groups["name"].Value,
-                        Int32.Parse(match.Groups["speed"].Value),
-                        Int32.Parse(match.Groups["timeFlying"].Value),
-                        Int32.Parse(match.Groups["timeResting"].Value));
-                }
+                d.addIngredientLine(line);
                 line = Console.ReadLine();
             }
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            Console.WriteLine("Record: " + d.getMaxDistance(2503));
-            Reindeer bestdeer = d.getHighScore(2503);
-            Console.WriteLine("Highest score was {0} by {1}", bestdeer.getName(),bestdeer.getScore());
+            Console.WriteLine("Part 1:");
+            d.printBestCombination(100);
+            Console.WriteLine("Part 2:");
+            d.printBestCombination(100, 500);
             Console.WriteLine("loop time in milliseconds: {0}",
                                 stopwatch.ElapsedMilliseconds);
 
